@@ -1,21 +1,33 @@
 #![no_std]
 #![no_main]
-
-mod vga_buffer;
+#![feature(custom_test_frameworks)]
+#![test_runner(nugget::test_runner)]
+#![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
+use nugget::println;
+
 
 #[no_mangle]
 pub extern "C" fn _start() -> !{
     println!("Hello World, this is {}: a basic operating system for learning.", "NUGGET");
-    panic!("Oops! Something went terribly wrong. Please restart the machine.");
+    // panic!("Oops! Something went terribly wrong. Please restart the machine.");
+
+    #[cfg(test)]
+    test_main(); // Run tests conditionally in testing contexts
 
     loop {}
 }
 
-
+#[cfg(not(test))] // Normal panic handler
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
     loop {}
+}
+
+#[cfg(test)]
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    nugget::test_panic_handler(info)
 }
