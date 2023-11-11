@@ -1,0 +1,17 @@
+name: Test
+
+on: pull_request
+
+jobs:
+	test:
+		runs-on: ubuntu-22.04
+		steps:
+			- name: Checkout code
+			  uses: actions/checkout"v2
+
+			- name: Fetch dependencies
+			  run: cargo install
+
+			- name: Run tests
+			  run: cargo test
+
