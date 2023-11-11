@@ -1,64 +1,12 @@
 #![no_std]
 #![no_main]
-
-
 #![feature(custom_test_frameworks)]
-#![test_runner(crate::test_runner)]
-#![reexport_test_harness_main = "test_main"] // Make sure our test harness' entry point is called test_main to avoid passing over testing
-
-#[cfg(test)]
-fn test_runner(tests: &[&dyn Testable]) {
-    serial_println!("Running {} tests", tests.len());
-    for test in tests {
-        test.run(); // Provide logging via serial
-    }
-    // Now that we've run all our tests, quit from QEMU
-    exit_qemu(QemuExitCode::Success);
-}
-
-#[test_case]
-fn trivial_assertion() {
-    assert_eq!(1, 0);
-}
-
-/// Provide serial test printout statements to a test function
-pub trait Testable {
-    fn run(&self) -> ();
-}
-
-/// Wrap serial test printout statements around a test function callable Fn()
-impl<T> Testable for T
-where
-    T: Fn(),
-{
-    fn run(&self) {
-        serial_print!("{}...\t", core::any::type_name::<T>());
-        self();
-        serial_println!("[ok]");
-    }
-}
-
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)]
-pub enum QemuExitCode {
-    Success = 0x10,
-    Failure = 0x11,
-}
-
-pub fn exit_qemu(exit_code: QemuExitCode) {
-    use x86_64::instructions::port::Port;
-
-    unsafe {
-        let mut port = Port::new(0xf4);
-        port.write(exit_code as u32);
-    }
-}
-
-mod vga_buffer;
-mod serial;
+#![test_runner(nugget::test_runner)]
+#![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
+use nugget::println;
+
 
 #[no_mangle]
 pub extern "C" fn _start() -> !{
@@ -78,11 +26,8 @@ fn panic(info: &PanicInfo) -> ! {
     loop {}
 }
 
-#[cfg(test)] // Test mode panic handler
+#[cfg(test)]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    serial_println!("[failed]\n");
-    serial_println!("Error: {}\n", info);
-    exit_qemu(QemuExitCode::Failure);
-    loop {} // Kept as compiler doesn't know we're causing a program exit
+    nugget::test_panic_handler(info)
 }
