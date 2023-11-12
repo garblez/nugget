@@ -4,6 +4,7 @@ on: [push, pull_request]
 
 jobs:
     test:
+        name: Testing
         runs-on: ubuntu-latest
         steps:
           - name: Checkout code
@@ -15,9 +16,7 @@ jobs:
                 profile: minimal
                 toolchain: nightly-2023-10-04
                 override: true
-        
-          - name: Add rust-src component
-            run: rustup component add rust-src
+                components: rustfmt, clippy, rust-src
 
           - name: Run tests
             uses: actions-rs/cargo@v1
