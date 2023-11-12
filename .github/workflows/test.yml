@@ -15,6 +15,9 @@ jobs:
                 profile: minimal
                 toolchain: nightly-2023-10-04
                 override: true
+        
+          - name: Add rust-src component
+            run: rustup component add rust-src
 
 
           - name: Run tests
