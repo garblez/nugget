@@ -13,9 +13,15 @@ pub extern "C" fn _start() -> !{
     println!("Hello World, this is {}: a basic operating system for learning.", "NUGGET");
     // panic!("Oops! Something went terribly wrong. Please restart the machine.");
 
+    nugget::init();
+
+    // invoke a breakpoint exception
+    x86_64::instructions::interrupts::int3(); // This is the x86 instruction that fires a breakpoint exception
+
     #[cfg(test)]
     test_main(); // Run tests conditionally in testing contexts
 
+    println!("It did not crash!");
     loop {}
 }
 
