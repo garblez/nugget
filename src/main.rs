@@ -14,14 +14,7 @@ pub extern "C" fn _start() -> !{
     // panic!("Oops! Something went terribly wrong. Please restart the machine.");
 
     nugget::init();
-
-    fn stack_overflow() {
-        stack_overflow(); // for each recursion the return address is pushed
-    }
-
-    // trigger a stack overflow
-    stack_overflow();
-
+    
     #[cfg(test)]
     test_main(); // Run tests conditionally in testing contexts
 
