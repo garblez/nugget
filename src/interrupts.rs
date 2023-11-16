@@ -1,12 +1,19 @@
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 use crate::println;
+use crate::gdt;
 use lazy_static::lazy_static;
 
 lazy_static! {
     static ref IDT: InterruptDescriptorTable = {
         let mut idt = InterruptDescriptorTable::new();
         idt.breakpoint.set_handler_fn(breakpoint_handler);
-        idt.double_fault.set_handler_fn(double_fault_handler);
+        
+        // Unsafe because the caller must ensure the IST index given is valid and not already in use for some other exception handler
+        unsafe {
+            idt.double_fault.set_handler_fn(double_fault_handler)
+                .set_stack_index(gdt::DOUBLE_FAULT_IST_INDEX); // Set the stack index (on the IST) for a double fault handler
+        }
+        
         idt
     };
 }
