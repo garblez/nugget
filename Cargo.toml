@@ -33,3 +33,7 @@ test-timeout = 60 # (in seconds) : here we want to make bootimage wait through e
 [[test]]
 name = "should_panic"
 harness = false
+
+[[test]]
+name = "stack_overflow"
+harness = false
