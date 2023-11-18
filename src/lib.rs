@@ -13,6 +13,13 @@ pub mod gdt;
 
 use core::panic::PanicInfo;
 
+/// Execute a CPU halt to prevent cycles being used on empty looping
+pub fn hlt_loop() -> ! {
+    loop {
+        x86_64::instructions::hlt();
+    }
+}
+
 /// Provide serial test printout statements to a test function
 pub trait Testable {
     fn run(&self) -> ();
@@ -45,7 +52,7 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
     serial_println!("[failed]\n");
     serial_println!("Error: {}\n", info);
     exit_qemu(QemuExitCode::Failure);
-    loop {} // Kept as compiler doesn't know we're causing a program exit
+    hlt_loop(); // Kept as compiler doesn't know we're causing a program exit
 }
 
 #[cfg(test)] // Entry point for `cargo test`
@@ -53,7 +60,7 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
 pub extern "C" fn _start() -> ! {
     init(); // Initialise the IDT
     test_main();
-    loop {}
+    hlt_loop();
 }
 
 #[cfg(test)]

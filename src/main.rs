@@ -19,18 +19,14 @@ pub extern "C" fn _start() -> !{
     test_main(); // Run tests conditionally in testing contexts
 
     println!("It did not crash!");
-    loop {
-        use nugget::print;
-        print!("-"); // Provoke a deadlock
-        for _ in 0..10000 {}
-    }
+    nugget::hlt_loop();
 }
 
 #[cfg(not(test))] // Normal panic handler
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    loop {}
+    nugget::hlt_loop();
 }
 
 #[cfg(test)]
