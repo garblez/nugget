@@ -6,7 +6,7 @@
 
 use bootloader::{BootInfo, entry_point};
 use core::panic::PanicInfo;
-use nugget::println;
+use nugget::{println, memory::BootInfoFrameAllocator};
 
 entry_point!(kernel_main); // Type-check the entry point for the signature expected by the bootloader.
 
@@ -27,10 +27,12 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
 
     // initialise a memory Mapper
     let mut mapper = unsafe { memory::init(phys_mem_offset) };
-    let mut frame_allocator = memory::EmptyFrameAllocator;
+    let mut frame_allocator = unsafe {
+        BootInfoFrameAllocator::init(&boot_info.memory_map)
+    };
 
     // Map an unused page
-    let page = Page::containing_address(VirtAddr::new(0));
+    let page = Page::containing_address(VirtAddr::new(0xdeadbeef000));
     memory::create_example_mapping(page, &mut mapper, &mut frame_allocator);
 
     // Write the string `New!` to the screen through the new mapping
