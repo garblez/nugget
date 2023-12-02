@@ -11,8 +11,8 @@ use nugget::println;
 entry_point!(kernel_main); // Type-check the entry point for the signature expected by the bootloader.
 
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
-    use nugget::memory::translate_addr;
-    use x86_64::VirtAddr;
+    use nugget::memory;
+    use x86_64::{structures::paging::Translate, VirtAddr};
 
     println!("Hello World, this is {}: a basic operating system for learning.", "NUGGET");
     // panic!("Oops! Something went terribly wrong. Please restart the machine.");
@@ -20,6 +20,10 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     nugget::init();
 
     let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
+
+
+    // initialise a memory Mapper
+    let mapper = unsafe { memory::init(phys_mem_offset) };
     
     let addresses = [
         // identity-mapped vga buffer page
@@ -34,7 +38,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
 
     for &address in &addresses {
         let virt = VirtAddr::new(address);
-        let phys = unsafe { translate_addr(virt, phys_mem_offset) };
+        let phys = mapper.translate_addr(virt); // Use the crate Mapper translation
         println!("{:?} -> {:?}", virt, phys);
     }
 
