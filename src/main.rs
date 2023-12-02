@@ -31,13 +31,6 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
         BootInfoFrameAllocator::init(&boot_info.memory_map)
     };
 
-    // Map an unused page
-    let page = Page::containing_address(VirtAddr::new(0xdeadbeef000));
-    memory::create_example_mapping(page, &mut mapper, &mut frame_allocator);
-
-    // Write the string `New!` to the screen through the new mapping
-    let page_ptr: *mut u64 = page.start_address().as_mut_ptr();
-    unsafe { page_ptr.offset(400).write_volatile(0x_f021_f077_f065_f04e) };
     
     #[cfg(test)]
     test_main(); // Run tests conditionally in testing contexts
