@@ -55,9 +55,15 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
     hlt_loop(); // Kept as compiler doesn't know we're causing a program exit
 }
 
+
+#[cfg(test)]
+use bootloader::{BootInfo, entry_point};
+
+#[cfg(test)]
+entry_point!(test_kernel_main);
+
 #[cfg(test)] // Entry point for `cargo test`
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
+fn test_kernel_main(_boot_info: &'static BootInfo) -> ! {
     init(); // Initialise the IDT
     test_main();
     hlt_loop();

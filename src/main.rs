@@ -4,17 +4,18 @@
 #![test_runner(nugget::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
+use bootloader::{BootInfo, entry_point};
 use core::panic::PanicInfo;
 use nugget::println;
 
+entry_point!(kernel_main); // Type-check the entry point for the signature expected by the bootloader.
 
-#[no_mangle]
-pub extern "C" fn _start() -> !{
+fn kernel_main(boot_info: &'static BootInfo) -> ! {
     println!("Hello World, this is {}: a basic operating system for learning.", "NUGGET");
     // panic!("Oops! Something went terribly wrong. Please restart the machine.");
 
     nugget::init();
-    
+
     #[cfg(test)]
     test_main(); // Run tests conditionally in testing contexts
 
